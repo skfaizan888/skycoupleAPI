@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "cors": "^2.8.5",
+    "date-and-time": "^3.6.0",
+    "express": "^5.1.0",
+    "india-pincode-search": "^1.0.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.16.1",
+    "uuid": "^11.1.0"
+  },
+  "scripts": {
+    "dev": "nodemon index.js"
+  }
+}
