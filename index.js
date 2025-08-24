@@ -1,3 +1,6 @@
+require("dotenv").config({
+  path: ".env",
+});
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
@@ -10,10 +13,14 @@ const favoritemodel = require("./model/favoritemodel");
 const app = express();
 app.use(cors());
 app.use(express.json());
-const port = 7070;
+const PORT=7070
 const emptoken = "user888";
 
-mongoose.connect("mongodb://127.0.0.1:27017/userdb").then(() => {
+// mongoose.connect("mongodb://127.0.0.1:27017/userdb").then(() => {
+//   console.log("MongoDb connect successfull..");
+// });
+
+mongoose.connect(process.env.MONGO_URI).then(() => {
   console.log("MongoDb connect successfull..");
 });
 
@@ -65,10 +72,10 @@ app.post("/addfavorite", async (req, res) => {
 });
 
 // SHOW USER
-  app.get("/alluser", async (req, res) => {
-    const result = await usermodel.find({});
-    res.send(result);
-  });
+app.get("/alluser", async (req, res) => {
+  const result = await usermodel.find({});
+  res.send(result);
+});
 
 app.post("/signup", async (req, res) => {
   const { mobile, fullname, aadhaar, password, confirmpassword, adminid } =
@@ -106,7 +113,7 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-app.post("/adminsignup", async (req, res) => {
+app.post("/     ", async (req, res) => {
   const { mobile, username, adhaarno, password, confirmpassword } = req.body;
 
   const existingUserByEmail = await adminsignmodel.findOne({ mobile });
@@ -177,6 +184,6 @@ app.post("/findsignadminid", async (req, res) => {
   res.json(result);
 });
 
-app.listen(port, () => {
-  console.log(`Server is up port no ${port} `);
+app.listen(PORT, () => {
+  console.log(`Server is up port no ${PORT} `);
 });
