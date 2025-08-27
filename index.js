@@ -11,13 +11,7 @@ const adminsignmodel = require("./model/adimsignmodel");
 const favoritemodel = require("./model/favoritemodel");
 
 const app = express();
-app.use(
-  cors({
-    origin: "https://skycoupleadmin.vercel.app",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-  })
-);
+app.use(cors());
 app.use(express.json());
 const PORT = 7070;
 const emptoken = "user888";
