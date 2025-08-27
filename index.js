@@ -11,9 +11,15 @@ const adminsignmodel = require("./model/adimsignmodel");
 const favoritemodel = require("./model/favoritemodel");
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://skycoupleadmin.vercel.app",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 app.use(express.json());
-const PORT=7070
+const PORT = 7070;
 const emptoken = "user888";
 
 // mongoose.connect("mongodb://127.0.0.1:27017/userdb").then(() => {
@@ -113,7 +119,7 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-app.post("/     ", async (req, res) => {
+app.post("/adminsignup", async (req, res) => {
   const { mobile, username, adhaarno, password, confirmpassword } = req.body;
 
   const existingUserByEmail = await adminsignmodel.findOne({ mobile });
