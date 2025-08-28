@@ -134,15 +134,16 @@ app.post("/adminsignup", async (req, res) => {
 });
 
 app.post("/adminlogin", async (req, res) => {
-  const result = await adminsignmodel.find(req.body);
-  if (result.length > 0) {
-    const { adhaarno, mobile, password, confirmpassword, adminid } = result[0];
-    const payload = { adhaarno, mobile, password, confirmpassword };
-    const token = jwt.sign(payload, emptoken);
-    res.json({ token: token, adminid: adminid });
-  } else {
-    res.status(401).json("Invalid user, please Register");
-  }
+  const admin = await adminsignmodel.findOne(req.body); 
+  if (!admin) return res.status(401).json("Invalid user, please Register");
+
+  const { adhaarno, mobile, password, confirmpassword, adminid } = admin;
+  const token = jwt.sign(
+    { adhaarno, mobile, password, confirmpassword },
+    emptoken
+  );
+
+  res.json({ token, adminid });
 });
 
 app.post("/login", async (req, res) => {
@@ -158,6 +159,20 @@ app.post("/login", async (req, res) => {
 });
 
 //FIND DATA
+
+app.post("/findoppositeusers", async (req, res) => {
+  try {
+    const { currentGender } = req.body;
+    const result = await usermodel.find({
+      isActive: true,
+      gender: { $ne: currentGender },
+    });
+    res.json(result);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ error: "Failed to fetch users" });
+  }
+});
 
 app.post("/findsign", async (req, res) => {
   const { signid } = req.body;
