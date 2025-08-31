@@ -2,8 +2,8 @@
 const mongoose = require("mongoose");
 
 const favoritemodel = mongoose.model("favorites", {
-  signid: { type: String, required: true },         // The one who adds to favorite
-  favoriteUserId: { type: String, required: true }, // The one being added
+  signid: { type: String, required: true },        
+  favoriteUserId: { type: String, required: true }, 
   date: { type: Date, default: Date.now },
 });
 
