@@ -24,14 +24,13 @@ const emptoken = "user888";
 //   console.log("MongoDb connect successfull..");
 // });
 
-const db = mongoose.connect(process.env.MONGO_URI).then(() => {
+mongoose.connect(process.env.MONGO_URI).then(() => {
   console.log("MongoDb connect successfull..");
 });
 
 app.get("/", (req, res) => {
   res.send("Welcome SkyCouple Application");
 });
-
 
 app.post("/api/conversation", async (req, res) => {
   try {
@@ -45,7 +44,6 @@ app.post("/api/conversation", async (req, res) => {
     console.log(error);
   }
 });
-
 
 app.get("/api/conversation/:userid", async (req, res) => {
   try {
@@ -66,7 +64,7 @@ app.get("/api/conversation/:userid", async (req, res) => {
         }
 
         return {
-          conversationId: item.conversationId, 
+          conversationId: item.conversationId,
           userdata: userdata
             ? {
                 fullname: userdata.fullname,
@@ -86,8 +84,6 @@ app.get("/api/conversation/:userid", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
-
 
 app.post("/api/message", async (req, res) => {
   try {
@@ -109,7 +105,7 @@ app.post("/api/message", async (req, res) => {
         await conversation.save();
       }
 
-      conversationId = conversation._id.toString(); 
+      conversationId = conversation._id.toString();
     }
 
     const newMessage = new messagemodel({
@@ -126,7 +122,7 @@ app.post("/api/message", async (req, res) => {
       senderId,
       receiverId,
       message,
-      time: newMessage.time, 
+      time: newMessage.time,
     });
   } catch (error) {
     console.error("Error saving message:", error);
@@ -161,7 +157,7 @@ app.post("/api/sendmessage", async (req, res) => {
 
     await newMessage.save();
 
-    const time = moment(newMessage.createdAt).format("hh:mm A"); 
+    const time = moment(newMessage.createdAt).format("hh:mm A");
 
     res.status(201).json({
       _id: newMessage._id,
@@ -169,14 +165,13 @@ app.post("/api/sendmessage", async (req, res) => {
       senderId,
       receiverId,
       message,
-      time, 
+      time,
     });
   } catch (error) {
     console.error("Error in /api/sendmessage =>", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 
 app.get("/api/message/:conversationId", async (req, res) => {
   try {
@@ -193,7 +188,7 @@ app.get("/api/message/:conversationId", async (req, res) => {
             userdata,
             message: item.message,
             conversationId: item.conversationId,
-            time: moment(item.createdAt).format("hh:mm A"), 
+            time: moment(item.createdAt).format("hh:mm A"),
           };
         })
       );
@@ -211,7 +206,7 @@ app.get("/api/message/:conversationId", async (req, res) => {
       if (checkConversation) {
         return checkMessages(checkConversation._id);
       } else {
-        return res.status(200).json([]); 
+        return res.status(200).json([]);
       }
     } else {
       return checkMessages(conversationId);
