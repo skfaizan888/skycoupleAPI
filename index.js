@@ -32,190 +32,190 @@ app.get("/", (req, res) => {
   res.send("Welcome SkyCouple Application");
 });
 
-// app.post("/api/conversation", async (req, res) => {
-//   try {
-//     const { senderId, receiverId } = req.body;
-//     const newConversation = new conversationmodel({
-//       members: [senderId, receiverId],
-//     });
-//     await newConversation.save();
-//     res.status(200).send("Conversation Create Sucessfully");
-//   } catch (error) {
-//     console.log(error);
-//   }
-// });
+app.post("/api/conversation", async (req, res) => {
+  try {
+    const { senderId, receiverId } = req.body;
+    const newConversation = new conversationmodel({
+      members: [senderId, receiverId],
+    });
+    await newConversation.save();
+    res.status(200).send("Conversation Create Sucessfully");
+  } catch (error) {
+    console.log(error);
+  }
+});
 
-// app.get("/api/conversation/:userid", async (req, res) => {
-//   try {
-//     const userid = req.params.userid;
-//     const conversations = await conversationmodel.find({
-//       members: { $in: [userid] },
-//     });
-//     const conversationListUserData = await Promise.all(
-//       conversations.map(async (item) => {
-//         const receiverId = item.members.find((member) => member !== userid);
+app.get("/api/conversation/:userid", async (req, res) => {
+  try {
+    const userid = req.params.userid;
+    const conversations = await conversationmodel.find({
+      members: { $in: [userid] },
+    });
+    const conversationListUserData = await Promise.all(
+      conversations.map(async (item) => {
+        const receiverId = item.members.find((member) => member !== userid);
 
-//         let userdata = null;
-//         if (receiverId) {
-//           userdata = await signusermodel.findOne(
-//             { signid: receiverId },
-//             { fullname: 1, signid: 1 }
-//           );
-//         }
+        let userdata = null;
+        if (receiverId) {
+          userdata = await signusermodel.findOne(
+            { signid: receiverId },
+            { fullname: 1, signid: 1 }
+          );
+        }
 
-//         return {
-//           conversationId: item.conversationId,
-//           userdata: userdata
-//             ? {
-//                 fullname: userdata.fullname,
-//                 receiverId: userdata.signid,
-//               }
-//             : {
-//                 fullname: "Unknown User",
-//                 receiverId,
-//               },
-//         };
-//       })
-//     );
+        return {
+          conversationId: item.conversationId,
+          userdata: userdata
+            ? {
+                fullname: userdata.fullname,
+                receiverId: userdata.signid,
+              }
+            : {
+                fullname: "Unknown User",
+                receiverId,
+              },
+        };
+      })
+    );
 
-//     res.status(200).json(conversationListUserData);
-//   } catch (error) {
-//     console.error("Error in /api/conversation/:userid =>", error);
-//     res.status(500).json({ error: "Internal Server Error" });
-//   }
-// });
+    res.status(200).json(conversationListUserData);
+  } catch (error) {
+    console.error("Error in /api/conversation/:userid =>", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
-// app.post("/api/message", async (req, res) => {
-//   try {
-//     let { conversationId, senderId, receiverId, message } = req.body;
+app.post("/api/message", async (req, res) => {
+  try {
+    let { conversationId, senderId, receiverId, message } = req.body;
 
-//     if (!senderId || !receiverId || !message) {
-//       return res.status(400).json({ error: "Missing required fields" });
-//     }
+    if (!senderId || !receiverId || !message) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
 
-//     if (conversationId === "new") {
-//       let conversation = await conversationmodel.findOne({
-//         members: { $all: [senderId, receiverId] },
-//       });
+    if (conversationId === "new") {
+      let conversation = await conversationmodel.findOne({
+        members: { $all: [senderId, receiverId] },
+      });
 
-//       if (!conversation) {
-//         conversation = new conversationmodel({
-//           members: [senderId, receiverId],
-//         });
-//         await conversation.save();
-//       }
+      if (!conversation) {
+        conversation = new conversationmodel({
+          members: [senderId, receiverId],
+        });
+        await conversation.save();
+      }
 
-//       conversationId = conversation._id.toString();
-//     }
+      conversationId = conversation._id.toString();
+    }
 
-//     const newMessage = new messagemodel({
-//       conversationId,
-//       senderId,
-//       receiverId,
-//       message,
-//     });
+    const newMessage = new messagemodel({
+      conversationId,
+      senderId,
+      receiverId,
+      message,
+    });
 
-//     await newMessage.save();
+    await newMessage.save();
 
-//     res.status(201).json({
-//       conversationId,
-//       senderId,
-//       receiverId,
-//       message,
-//       time: newMessage.time,
-//     });
-//   } catch (error) {
-//     console.error("Error saving message:", error);
-//     res.status(500).json({ error: "Internal Server Error" });
-//   }
-// });
+    res.status(201).json({
+      conversationId,
+      senderId,
+      receiverId,
+      message,
+      time: newMessage.time,
+    });
+  } catch (error) {
+    console.error("Error saving message:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
-// app.post("/api/sendmessage", async (req, res) => {
-//   try {
-//     const { conversationId, senderId, receiverId, message } = req.body;
+app.post("/api/sendmessage", async (req, res) => {
+  try {
+    const { conversationId, senderId, receiverId, message } = req.body;
 
-//     let conversation;
+    let conversation;
 
-//     if (!conversationId || conversationId === "new") {
-//       conversation = new conversationmodel({
-//         members: [senderId, receiverId],
-//       });
-//       await conversation.save();
-//     } else {
-//       conversation = await conversationmodel.findOne({ conversationId });
-//       if (!conversation) {
-//         return res.status(404).json({ error: "Conversation not found" });
-//       }
-//     }
+    if (!conversationId || conversationId === "new") {
+      conversation = new conversationmodel({
+        members: [senderId, receiverId],
+      });
+      await conversation.save();
+    } else {
+      conversation = await conversationmodel.findOne({ conversationId });
+      if (!conversation) {
+        return res.status(404).json({ error: "Conversation not found" });
+      }
+    }
 
-//     const newMessage = new messagemodel({
-//       conversationId: conversation.conversationId,
-//       senderId,
-//       receiverId,
-//       message,
-//     });
+    const newMessage = new messagemodel({
+      conversationId: conversation.conversationId,
+      senderId,
+      receiverId,
+      message,
+    });
 
-//     await newMessage.save();
+    await newMessage.save();
 
-//     const time = moment(newMessage.createdAt).format("hh:mm A");
+    const time = moment(newMessage.createdAt).format("hh:mm A");
 
-//     res.status(201).json({
-//       _id: newMessage._id,
-//       conversationId: conversation.conversationId,
-//       senderId,
-//       receiverId,
-//       message,
-//       time,
-//     });
-//   } catch (error) {
-//     console.error("Error in /api/sendmessage =>", error);
-//     res.status(500).json({ error: "Internal Server Error" });
-//   }
-// });
+    res.status(201).json({
+      _id: newMessage._id,
+      conversationId: conversation.conversationId,
+      senderId,
+      receiverId,
+      message,
+      time,
+    });
+  } catch (error) {
+    console.error("Error in /api/sendmessage =>", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
-// app.get("/api/message/:conversationId", async (req, res) => {
-//   try {
-//     const checkMessages = async (conversationId) => {
-//       const messages = await messagemodel.find({ conversationId });
+app.get("/api/message/:conversationId", async (req, res) => {
+  try {
+    const checkMessages = async (conversationId) => {
+      const messages = await messagemodel.find({ conversationId });
 
-//       const messageUserData = await Promise.all(
-//         messages.map(async (item) => {
-//           const userdata = await signusermodel.findOne(
-//             { signid: item.senderId },
-//             { fullname: 1, signid: 1, _id: 0 }
-//           );
-//           return {
-//             userdata,
-//             message: item.message,
-//             conversationId: item.conversationId,
-//             time: moment(item.createdAt).format("hh:mm A"),
-//           };
-//         })
-//       );
+      const messageUserData = await Promise.all(
+        messages.map(async (item) => {
+          const userdata = await signusermodel.findOne(
+            { signid: item.senderId },
+            { fullname: 1, signid: 1, _id: 0 }
+          );
+          return {
+            userdata,
+            message: item.message,
+            conversationId: item.conversationId,
+            time: moment(item.createdAt).format("hh:mm A"),
+          };
+        })
+      );
 
-//       return res.status(200).json(messageUserData);
-//     };
+      return res.status(200).json(messageUserData);
+    };
 
-//     const conversationId = req.params.conversationId;
+    const conversationId = req.params.conversationId;
 
-//     if (conversationId === "new") {
-//       const checkConversation = await conversationmodel.findOne({
-//         members: { $all: [req.query.senderId, req.query.receiverId] },
-//       });
+    if (conversationId === "new") {
+      const checkConversation = await conversationmodel.findOne({
+        members: { $all: [req.query.senderId, req.query.receiverId] },
+      });
 
-//       if (checkConversation) {
-//         return checkMessages(checkConversation._id);
-//       } else {
-//         return res.status(200).json([]);
-//       }
-//     } else {
-//       return checkMessages(conversationId);
-//     }
-//   } catch (error) {
-//     console.error("Error fetching messages:", error);
-//     res.status(500).json({ error: "Internal Server Error" });
-//   }
-// });
+      if (checkConversation) {
+        return checkMessages(checkConversation._id);
+      } else {
+        return res.status(200).json([]);
+      }
+    } else {
+      return checkMessages(conversationId);
+    }
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 app.post("/getfavorites", async (req, res) => {
   try {
