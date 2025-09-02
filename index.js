@@ -1,7 +1,7 @@
 require("dotenv").config({
   path: ".env",
 });
-const moment = require("moment");
+const moment = require("moment-timezone");
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
@@ -85,51 +85,6 @@ app.get("/api/conversation/:userid", async (req, res) => {
   }
 });
 
-app.post("/api/message", async (req, res) => {
-  try {
-    let { conversationId, senderId, receiverId, message } = req.body;
-
-    if (!senderId || !receiverId || !message) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
-
-    if (conversationId === "new") {
-      let conversation = await conversationmodel.findOne({
-        members: { $all: [senderId, receiverId] },
-      });
-
-      if (!conversation) {
-        conversation = new conversationmodel({
-          members: [senderId, receiverId],
-        });
-        await conversation.save();
-      }
-
-      conversationId = conversation._id.toString();
-    }
-
-    const newMessage = new messagemodel({
-      conversationId,
-      senderId,
-      receiverId,
-      message,
-    });
-
-    await newMessage.save();
-
-    res.status(201).json({
-      conversationId,
-      senderId,
-      receiverId,
-      message,
-      time: newMessage.time,
-    });
-  } catch (error) {
-    console.error("Error saving message:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
 app.post("/api/sendmessage", async (req, res) => {
   try {
     const { conversationId, senderId, receiverId, message } = req.body;
@@ -153,11 +108,15 @@ app.post("/api/sendmessage", async (req, res) => {
       senderId,
       receiverId,
       message,
+      createdAt: moment().tz("Asia/Kolkata").toDate(), // save in IST
     });
 
     await newMessage.save();
 
-    const time = moment(newMessage.createdAt).format("hh:mm A");
+    
+    const time = moment(newMessage.createdAt)
+      .tz("Asia/Kolkata")
+      .format("hh:mm A");
 
     res.status(201).json({
       _id: newMessage._id,
@@ -184,11 +143,14 @@ app.get("/api/message/:conversationId", async (req, res) => {
             { signid: item.senderId },
             { fullname: 1, signid: 1, _id: 0 }
           );
+
           return {
             userdata,
             message: item.message,
             conversationId: item.conversationId,
-            time: moment(item.createdAt).format("hh:mm A"),
+            time: moment(item.createdAt) // ✅ use item not msg
+              .tz("Asia/Kolkata")
+              .format("hh:mm A"),
           };
         })
       );
@@ -216,7 +178,6 @@ app.get("/api/message/:conversationId", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 app.post("/getfavorites", async (req, res) => {
   try {
     const { signid } = req.body;

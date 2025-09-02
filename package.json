@@ -6,7 +6,7 @@
     "express": "^5.1.0",
     "india-pincode-search": "^1.0.2",
     "jsonwebtoken": "^9.0.2",
-    "moment": "^2.30.1",
+    "moment-timezone": "^0.6.0",
     "mongoose": "^8.16.1",
     "uuid": "^11.1.0"
   },
